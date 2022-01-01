@@ -1,0 +1,14 @@
+Build Activities with no logic - Oyanow
+Activity layouts - complex UIs to be implemented - Oyanow
+Authentication - Sign Up, Sign In, activation (OTP<Phone Number>)
+Data storage - Local Db, Persistent DBMs
+
+Let my backend act as a web service to various clients (android, ios, web, etc). So on my client I only perform normal http requests 
+(relevant to client in question) to communicate with the backend and retrieve data???????
+
+client - presentation architecture - model, view, presenter/viewmodel/controller
+backend - domain/business logic, data, and application architectures/layers/tiers or can they/some be in client?
+
+follow android concepts when building app - check back of jotter. networking, architecture, etc
+package structure of go web service
+design api/web service properly

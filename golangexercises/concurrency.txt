@@ -1,0 +1,180 @@
+concurrency is like being the head of a department, trying to organize your components in an ordely manner and preventing issues. another analogy?
+true parallelism is enabled in multi processor 
+
+concurrency is common is distributed systems?
+
+CHALLENGE
+large data recursion with go routines - factorial
+do a semaphore nightclub where someone can leave temporary as one of the case scenarios
+http://whipperstacker.com/2015/10/05/3-trivial-concurrency-exercises-for-the-confused-newbie-gopher/
+
+
+As the clock speeds are now decreasing to leave way to multicore architectures, 
+there is no coming back: a paradigm that is not naturally oriented towards parallelism and 
+concurrency is doomed for failure.
+Of course there are situations in which the use of mutable state is necessary, e.g. IO
+
+A race condition or race hazard is the behavior of an electronics, software, or other system where the output is dependent on the sequence or timing
+ of other uncontrollable events
+
+synchronisation is like passing a baton in
+a relay race
+//premature optimization
+
+A race condition occurs when two or more threads can access shared data and they try to change it at the same time.
+Because the thread scheduling algorithm can swap between threads at any time, you don't know the order in which the threads will attempt to access the shared data.
+Therefore, the result of the change in data is dependent on the thread scheduling algorithm, i.e. both threads are "racing" to access/change the data. 
+
+In order to prevent race conditions from occurring, you would typically put a lock around the shared data to ensure only one thread can access the data at a time.
+"...the other thread will have to wait until the lock is released before it can proceed.
+This makes it very important that the lock is released by the holding thread when it is finished with it. If it never releases it, then the other thread will wait indefinitely."
+
+shared state/data/resource
+
+communication b/w threads/routines/processes(not application process) to pass signals to bring about order and expected behavior. This is what creates complexity
+For this reason, it pays to keep interaction to a minimum, and to stick to simple and proven designs wherever possible.
+communication happens typically by shared data
+channels communicate? or transfer value? b/w goroutines? buffered and unbuffered
+
+threads can share state/data usually e.g. global vars, usually in the heap. thats why a functional program that doesnt mutate state is usually good for writing a concurrent code
+
+Non-blocking IO
+
+In computer science, non-blocking synchronization ensures that threads competing for a shared resource do not have their execution indefinitely postponed 
+by mutual exclusion. A non-blocking algorithm is lock-free if there is guaranteed system-wide progress; wait-free if there is also guaranteed per-thread progress. (wiki)
+
+Shared data is the primary cause of complexity and obscure errors in multithreading. Although often essential, it pays to keep it as simple as possible.
+"A thread, while blocked, doesn't consume CPU resources."?
+"Multithreading is managed internally by a thread scheduler, a function the CLR typically delegates to the operating system"
+
+ui/main thread and other threads
+listener and worker thread
+local variables are private to a thread?...references (to locals?) can be shared among threads, allowing them to communicate via common fields.
+
+A thread is deemed blocked when its execution is paused for some reason
+blocking conditon - determine if a thread is blocked or not?
+
+a spinlock is a lock which causes a thread trying to acquire it to simply wait in a loop while repeatedly checking if the lock is available.
+In general, this is very wasteful on processor time: as far as the CLR and operating system are concerned, the thread is performing an important calculation, and so gets allocated resources accordingly
+
+Declaring an atomic variable guarantees that operations made on the variable occur in an atomic fashion, i.e., 
+that all of the substeps of the operation are completed within the thread they are executed and are not interrupted by other threads. 
+For example, an increment-and-test operation requires the variable to be incremented and then compared to another value; 
+an atomic operation guarantees that both of these steps will be completed as if they were a single indivisible/uninterruptible operation.
+If a group of variables are always read and written within the same lock, you can say the variables are read and written atomically.
+"Atomic operation" means an operation that appears to be instantaneous from the perspective of all other threads. You don't need to worry about a partly complete operation when the guarantee applies.
+The problem of atomicity, which is the situation where an operation will fail if it is interrupted mid-way through.
+Assembly language statements are naturally atomic: they cannot be interrupted half-way through.
+
+foo = 73829329L
+Making the operation atomic consists in using synchronization mechanisms in order to make sure that the operation is seen, from any other thread, as a single, atomic (i.e. not splittable in parts), operation. 
+That means that any other thread, once the operation is made atomic, will either see the value of foo before the assignment, or after the assignment. 
+But never the intermediate value.
+
+Synchronizing all accesses to a variable allows only a single thread at a time to access the variable, and forces all other threads to wait for that accessing thread to release its access to the variable
+
+A Mutex is like a C# lock, but it can work across multiple processes. In other words, Mutex can be computer-wide as well as application-wide.
+A mutex is the same as a lock but it can be system wide (shared by multiple processes).
+
+A deadlock happens when two threads each wait for a resource held by the other, so neither can proceed.
+The best way to avoid deadlocks is to avoid having processes cross over in this way(locking access by other threads). Reduce the need to lock anything as much as you can.
+
+A semaphore is like a nightclub: it has a certain capacity, enforced by a bouncer. Once it’s full, no more people can enter, and a queue builds up outside. 
+Then, for each person that leaves, one person enters from the head of the queue.
+
+Semaphores can be useful in limiting concurrency — preventing too many threads from executing a particular piece of code at once.
+e.g. a buffered chan -> sem := make(chan int, 4) or a waitgroup?
+The difference between a mutex and a semaphore is that only one thread at a time can acquire a 
+mutex, but some preset number of threads can concurrently acquire a semaphore. 
+That’s why a mutex is sometimes called a binary semaphore.
+
+Immutability is also valuable in multithreading in that it avoids the problem of shared writable state — by eliminating (or minimizing) the writable.
+One pattern is to use immutable objects to encapsulate a group of related fields, to minimize lock durations.
+
+A producer/consumer queue is a common requirement in threading. Here’s how it works:
+-A queue is set up to describe work items — or data upon which work is performed.
+-When a task needs executing, it’s enqueued, allowing the caller to get on with other things.
+-One or more worker threads plug away in the background, picking off and executing queued items.
+
+In recent times, CPU clock speeds have stagnated and manufacturers have shifted their focus to increasing core counts. 
+This is problematic for us as programmers because our standard single-threaded code will not automatically run faster as a result of those extra cores.
+
+The correct use of a semaphore is for signaling from one task to another. A mutex is meant to be taken and released, always in that order, 
+by each task that uses the shared resource it protects. By contrast, tasks that use semaphores either signal or wait—not both. 
+For example, Task 1 may contain code to post (i.e., signal or increment) a particular semaphore when the "power" button is pressed and 
+Task 2, which wakes the display, pends on that same semaphore. In this scenario, one task is the producer of the event signal; the other the consumer.
+A semaphore does the same as a mutex but allows x number of threads to enter, 
+this can be used for example to limit the number of cpu, io or ram intensive tasks running at the same time.
+Mutex is for exclusive access to a resource
+
+(Counting) semaphore
+Conceptually, a semaphore is a nonnegative integer count. Semaphores are typically used to coordinate access to resources, 
+with the semaphore count initialized to the number of free resources. Threads then atomically increment the count when resources are added and 
+atomically decrement the count when resources are removed.
+When the semaphore count becomes zero, indicating that no more resources are present, 
+threads trying to decrement the semaphore block wait until the count becomes greater than zero.
+In a producer/consumer situation you can associate a counting semaphore with a container (typically a queue), increment after insert, and decrement before removal.
+Generally, in computer science, “semaphores” are constructs to synchronize access to shared resources.
+Counting semaphores give simultaneous access to some resource for a limited number of users (the “count”).
+
+Critical Section= User object used for allowing the execution of just one active thread from many others within one process. 
+The other non selected threads are put to sleep.
+
+Monitors provide a mechanism for threads to temporarily give up exclusive access, in order to wait for some condition to be met, 
+before regaining exclusive access and resuming their task.
+
+Green threads are threads that are scheduled by a virtual machine (VM). In contrast, typical threads are scheduled by the underlying operating system. 
+Green threads emulate multithreaded environments without relying on any native OS capabilities, and they are managed in user space instead of kernel space, 
+enabling them to work in environments that do not have native thread support.
+
+Processes are operating system (OS) managed and in case of a modern OS they are truly concurrent in the presence of suitable hardware support (multiprocessor and multicore systems).
+
+Synchronous message passing systems require the sender and receiver to wait for each other to transfer the message. That is, the sender will not continue until the receiver has received the message.
+The first advantage is that reasoning about the program can be simplified in that there is a synchronisation point between sender and receiver on message transfer. 
+The second advantage is that no buffering is required. The message can always be stored on the receiving side, because the sender will not continue until the receiver is ready.
+Asynchronous message passing systems deliver a message from sender to receiver, without waiting for the receiver to be ready.
+The advantage of asynchronous communication is that the sender and receiver can overlap their computation because they do not wait for each other.
+
+A critical section is a section of code that is executed by multiple threads and where the sequence of execution for the threads makes a difference in the result of the concurrent execution of the critical section.
+In concurrent programming, concurrent accesses to shared resources can lead to unexpected or erroneous behavior, so parts of the program where the shared resource is accessed are protected. 
+This protected section is the critical section or critical region. It cannot be executed by more than one process at a time.
+
+
+A channel (unbuffered?) that recieves a value waits for that value to be collected (blocking channel), and the other way round too. (Relay race)
+send/pass info/valu/data to a channel
+deadlock appens only in buffered channels?
+race conditions vs deadlock poblems
+try and make sure you main func doesnt exit before an important go routine finishes
+receive ...... from a channel
+range through/over a channel
+channels are workers?
+select
+select proceeds with the first receive that’s ready?
+Go’s select lets you wait on multiple channel operations. 
+timeout with time.After, time.Sleep
+close channel
+waitgroup() with /done/ to minus from waitgroup, wait()...
+<- done. done is a chan. Put off value from chan into thin air/nothing
+a chan defined like <- chan int, means you can only receive values from it, you can do send only too -> chan int, or bi-directional
+close chan and you cant put into it but you can receive from it
+You can use waitgroups to wait for goroutines or you can use time.sleep
+You can implement mutex or atomicity
+
+select
+
+time
+time.After
+time.Sleep
+time.NewTimer
+One reason a timer may be useful is that you can cancel the timer before it expires
+Timers are for when you want to do something once in the future - 
+tickers are for when you want to do something repeatedly at regular intervals.
+ticker.Stop()
+
+Printf
+Sprintf
+Fprintf
+
+
+synchronisation constraints/patterns/solutions???
+-mutex (mutual exclusion) - can be implemented traditionally or with message passing (with channels in golang) - serialization with message passing or mut. ex. with message passing

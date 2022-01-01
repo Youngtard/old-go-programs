@@ -1,0 +1,2 @@
+test android client communication with kyc backend using localhost 
+or deploy to heroku
